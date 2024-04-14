@@ -20,9 +20,12 @@ const Button: React.FC<IProps> = forwardRef(
 				onPress={onPress}
 				activeOpacity={activeOpacity}
 				variant={variant}
+				style={customStyles?.buttonStyles}
 				{...ref}
 			>
-				<S.Text variant={variant}>{text}</S.Text>
+				<S.Text variant={variant} style={customStyles?.textStyles}>
+					{text}
+				</S.Text>
 			</S.Button>
 		);
 	}

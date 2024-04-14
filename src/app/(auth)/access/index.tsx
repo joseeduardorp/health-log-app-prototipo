@@ -2,25 +2,26 @@ import { useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import Header from '@/components/auth/Header';
+import Title from '@/components/auth/Title';
 import Button from '@/components/shared/Button';
 
 import * as S from './styles';
 
 import { Actions } from './types';
 
-export default function Login() {
-	const params = useLocalSearchParams<{ action: Actions }>();
+export default function Access() {
+	const { action } = useLocalSearchParams<{ action: Actions }>();
+	const title =
+		action === 'login'
+			? 'Qual perfil deseja acessar?'
+			: 'Que tipo de perfil deseja criar?';
 
 	return (
 		<S.Container>
 			<StatusBar style="auto" />
 			<Header />
 
-			<S.Title>
-				{params.action === 'login'
-					? 'Qual perfil deseja acessar?'
-					: 'Que tipo de perfil deseja criar?'}
-			</S.Title>
+			<Title text={title} customStyles={{ marginTop: 150 }} />
 
 			<S.ButtonContainer>
 				<Button text="Paciente" />

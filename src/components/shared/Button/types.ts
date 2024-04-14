@@ -1,3 +1,5 @@
+import { StyleProp, TextStyle, ViewStyle } from 'react-native';
+
 export type VariantOptions = 'fill' | 'outline';
 
 export interface IProps {
@@ -5,5 +7,10 @@ export interface IProps {
 	activeOpacity?: number;
 	variant?: VariantOptions;
 	text: string;
-	customStyles?: Object;
+	customStyles?: ICustomStyles;
+}
+
+export interface ICustomStyles {
+	buttonStyles?: StyleProp<ViewStyle>;
+	textStyles?: StyleProp<TextStyle>;
 }
