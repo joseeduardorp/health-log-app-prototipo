@@ -1,7 +1,7 @@
 import styled from 'styled-components/native';
 
 export const Container = styled.SafeAreaView`
-	padding: 20;
+	padding: 20px;
 	background-color: '#fff';
 
 	flex: 1;
@@ -10,8 +10,8 @@ export const Container = styled.SafeAreaView`
 `;
 
 export const ImageContainer = styled.View`
-	margin-top: 150;
-	height: 300;
+	margin-top: 150px;
+	height: 300px;
 	width: 100%;
 
 	align-items: center;
@@ -23,8 +23,8 @@ export const Image = styled.Image`
 `;
 
 export const ButtonContainer = styled.View`
-	margin-top: 100;
-	height: 90;
+	margin-top: 100px;
+	height: 90px;
 
-	gap: 10;
+	gap: 10px;
 `;
