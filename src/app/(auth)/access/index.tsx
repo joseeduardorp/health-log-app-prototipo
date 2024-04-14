@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import Header from '@/components/auth/Header';
@@ -24,9 +24,19 @@ export default function Access() {
 			<Title text={title} customStyles={{ marginTop: 150 }} />
 
 			<S.ButtonContainer>
-				<Button text="Paciente" />
+				<Link
+					href={{ pathname: action, params: { profileType: 'patient' } }}
+					asChild
+				>
+					<Button text="Paciente" />
+				</Link>
 
-				<Button activeOpacity={0.65} text="Cuidador" variant="outline" />
+				<Link
+					href={{ pathname: action, params: { profileType: 'caregiver' } }}
+					asChild
+				>
+					<Button activeOpacity={0.65} text="Cuidador" variant="outline" />
+				</Link>
 			</S.ButtonContainer>
 		</S.Container>
 	);
