@@ -1,7 +1,9 @@
+export type VariantOptions = 'fill' | 'outline';
+
 export interface IProps {
 	onPress?: () => void;
 	activeOpacity?: number;
-	variant?: 'fill' | 'outline';
+	variant?: VariantOptions;
 	text: string;
 	customStyles?: Object;
 }

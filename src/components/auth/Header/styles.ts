@@ -1,9 +1,7 @@
-import { StyleSheet } from 'react-native';
+import styled from 'styled-components/native';
 
-export const styles = StyleSheet.create({
-	backButton: {
-		position: 'absolute',
-		top: 40,
-		left: 20,
-	},
-});
+export const BackButton = styled.TouchableOpacity`
+	position: absolute;
+	top: 40;
+	left: 20;
+`;

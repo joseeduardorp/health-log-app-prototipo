@@ -1,7 +1,6 @@
-import { Text, TouchableOpacity } from 'react-native';
 import { forwardRef } from 'react';
 
-import { fill, outline } from './styles';
+import * as S from './styles';
 
 import { IProps } from './types';
 
@@ -16,17 +15,15 @@ const Button: React.FC<IProps> = forwardRef(
 		},
 		ref
 	) => {
-		const styles = variant === 'fill' ? fill : outline;
-
 		return (
-			<TouchableOpacity
+			<S.Button
 				onPress={onPress}
 				activeOpacity={activeOpacity}
-				style={{ ...styles.button, ...customStyles }}
+				variant={variant}
 				{...ref}
 			>
-				<Text style={{ ...styles.buttonText, ...customStyles }}>{text}</Text>
-			</TouchableOpacity>
+				<S.Text variant={variant}>{text}</S.Text>
+			</S.Button>
 		);
 	}
 );

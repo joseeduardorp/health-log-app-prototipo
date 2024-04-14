@@ -1,37 +1,21 @@
-import { StyleSheet } from 'react-native';
+import styled from 'styled-components/native';
 
-export const fill = StyleSheet.create({
-	button: {
-		width: 220,
-		height: 40,
-		backgroundColor: '#665CF5',
-		borderColor: '#665CF5',
-		borderWidth: 2,
-		borderRadius: 5,
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	buttonText: {
-		color: '#fff',
-		fontSize: 16,
-		fontWeight: '700',
-	},
-});
+import { variants } from './variants';
+import { VariantOptions } from './types';
 
-export const outline = StyleSheet.create({
-	button: {
-		width: 220,
-		height: 40,
-		backgroundColor: '#00000000',
-		borderColor: '#665CF5',
-		borderWidth: 2,
-		borderRadius: 5,
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	buttonText: {
-		color: '#665CF5',
-		fontSize: 16,
-		fontWeight: '700',
-	},
-});
+export const Button = styled.TouchableOpacity<{ variant: VariantOptions }>`
+	width: 220;
+	height: 40;
+	background-color: ${({ variant }) => variants[variant].backgroundColor};
+	border-color: ${({ variant }) => variants[variant].borderColor};
+	border-width: 2;
+	border-radius: 5;
+	align-items: center;
+	justify-content: center;
+`;
+
+export const Text = styled.Text<{ variant: VariantOptions }>`
+	color: ${({ variant }) => variants[variant].color};
+	font-size: 16;
+	font-weight: 700;
+`;

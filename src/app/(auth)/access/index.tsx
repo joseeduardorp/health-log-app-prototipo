@@ -1,11 +1,10 @@
-import { Text, View, SafeAreaView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import Header from '@/components/auth/Header';
 import Button from '@/components/shared/Button';
 
-import { styles } from './styles';
+import * as S from './styles';
 
 import { Actions } from './types';
 
@@ -13,21 +12,21 @@ export default function Login() {
 	const params = useLocalSearchParams<{ action: Actions }>();
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<S.Container>
 			<StatusBar style="auto" />
 			<Header />
 
-			<Text style={styles.title}>
+			<S.Title>
 				{params.action === 'login'
 					? 'Qual perfil deseja acessar?'
 					: 'Que tipo de perfil deseja criar?'}
-			</Text>
+			</S.Title>
 
-			<View style={styles.buttonContainer}>
+			<S.ButtonContainer>
 				<Button text="Paciente" />
 
 				<Button activeOpacity={0.65} text="Cuidador" variant="outline" />
-			</View>
-		</SafeAreaView>
+			</S.ButtonContainer>
+		</S.Container>
 	);
 }

@@ -1,23 +1,23 @@
 import { StatusBar } from 'expo-status-bar';
-import { View, Image, SafeAreaView } from 'react-native';
 import { Link } from 'expo-router';
 
 import Button from '@/components/shared/Button';
 
-import { styles } from './styles';
+import * as S from './styles';
 
 export default function App() {
 	return (
-		<SafeAreaView style={styles.container}>
+		<S.Container>
 			<StatusBar style="auto" />
-			<View style={styles.imageContainer}>
-				<Image
-					style={styles.image}
-					source={require('../assets/splash-image.png')}
-				/>
-			</View>
 
-			<View style={styles.buttonContainer}>
+			<S.ImageContainer>
+				<S.Image
+					source={require('../assets/splash-image.png')}
+					resizeMode="contain"
+				/>
+			</S.ImageContainer>
+
+			<S.ButtonContainer>
 				<Link
 					href={{ pathname: 'access', params: { action: 'login' } }}
 					asChild
@@ -31,7 +31,7 @@ export default function App() {
 				>
 					<Button activeOpacity={0.65} text="Cadastrar" variant="outline" />
 				</Link>
-			</View>
-		</SafeAreaView>
+			</S.ButtonContainer>
+		</S.Container>
 	);
 }
