@@ -2,13 +2,15 @@ import { Text, View, SafeAreaView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
-import Header from '../../../components/auth/Header';
-import Button from '../../../components/shared/Button';
+import Header from '@/components/auth/Header';
+import Button from '@/components/shared/Button';
 
 import { styles } from './styles';
 
+import { Actions } from './types';
+
 export default function Login() {
-	const params = useLocalSearchParams();
+	const params = useLocalSearchParams<{ action: Actions }>();
 
 	return (
 		<SafeAreaView style={styles.container}>

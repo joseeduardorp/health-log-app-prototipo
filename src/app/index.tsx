@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, Image, SafeAreaView } from 'react-native';
 import { Link } from 'expo-router';
 
-import Button from '../components/shared/Button';
+import Button from '@/components/shared/Button';
 
 import { styles } from './styles';
 

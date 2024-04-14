@@ -3,14 +3,16 @@ import { forwardRef } from 'react';
 
 import { fill, outline } from './styles';
 
-const Button = forwardRef(
+import { IProps } from './types';
+
+const Button: React.FC<IProps> = forwardRef(
 	(
 		{
 			onPress = () => {},
 			activeOpacity = 0.85,
 			variant = 'fill',
 			text = '',
-			customStyles = {},
+			customStyles,
 		},
 		ref
 	) => {
@@ -21,7 +23,7 @@ const Button = forwardRef(
 				onPress={onPress}
 				activeOpacity={activeOpacity}
 				style={{ ...styles.button, ...customStyles }}
-				ref={ref}
+				{...ref}
 			>
 				<Text style={{ ...styles.buttonText, ...customStyles }}>{text}</Text>
 			</TouchableOpacity>
