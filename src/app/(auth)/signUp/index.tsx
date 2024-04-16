@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import { useState } from 'react';
 
@@ -22,10 +22,32 @@ export default function SignUp() {
 	const { profileType } = useLocalSearchParams<{ profileType: ProfileType }>();
 	const [hidePassword, setHidePassword] = useState<boolean>(true);
 
+	const [name, setName] = useState<string>('');
+	const [email, setEmail] = useState<string>('');
+	const [password, setPassword] = useState<string>('');
+
 	let title: string =
 		'Criar perfil de ' + profileTypesTranslate[profileType as ProfileType];
 
 	const toggleShowPassword = () => setHidePassword((prev) => !prev);
+
+	const send = () => {
+		if (!name || !email || !password) {
+			alert('Preencha todos os campos!');
+			return;
+		}
+
+		setName('');
+		setEmail('');
+		setPassword('');
+
+		router.navigate({
+			pathname: 'home',
+			params: {
+				profileType,
+			},
+		});
+	};
 
 	return (
 		<S.Container>
@@ -40,19 +62,21 @@ export default function SignUp() {
 					<S.Label>
 						<S.LabelText>Nome completo</S.LabelText>
 
-						<Input />
+						<Input value={name} onChangeText={setName} />
 					</S.Label>
 
 					<S.Label>
 						<S.LabelText>Email</S.LabelText>
 
-						<Input />
+						<Input inputMode="email" value={email} onChangeText={setEmail} />
 					</S.Label>
 
 					<S.Label>
 						<S.LabelText>Senha</S.LabelText>
 
 						<Input
+							value={password}
+							onChangeText={setPassword}
 							secureTextEntry={hidePassword}
 							onPressButton={toggleShowPassword}
 							buttonIcon={
@@ -66,16 +90,7 @@ export default function SignUp() {
 					</S.Label>
 				</S.Form>
 
-				<Button
-					text="Cadastrar"
-					onPress={() =>
-						alert(
-							`Criando perfil de ${
-								profileTypesTranslate[profileType as ProfileType]
-							}...`
-						)
-					}
-				/>
+				<Button text="Cadastrar" onPress={send} />
 			</ViewWithKeyboard>
 		</S.Container>
 	);

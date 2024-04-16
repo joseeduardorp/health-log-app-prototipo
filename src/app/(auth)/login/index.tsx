@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import { useState } from 'react';
 
@@ -22,10 +22,30 @@ export default function Login() {
 	const { profileType } = useLocalSearchParams<{ profileType: ProfileType }>();
 	const [hidePassword, setHidePassword] = useState<boolean>(true);
 
+	const [email, setEmail] = useState<string>('');
+	const [password, setPassword] = useState<string>('');
+
 	let title: string =
 		'Acessar perfil de ' + profileTypesTranslate[profileType as ProfileType];
 
 	const toggleShowPassword = () => setHidePassword((prev) => !prev);
+
+	const send = () => {
+		if (!email || !password) {
+			alert('Preencha todos os campos!');
+			return;
+		}
+
+		setEmail('');
+		setPassword('');
+
+		router.navigate({
+			pathname: 'home',
+			params: {
+				profileType,
+			},
+		});
+	};
 
 	return (
 		<S.Container>
@@ -40,13 +60,15 @@ export default function Login() {
 					<S.Label>
 						<S.LabelText>Email</S.LabelText>
 
-						<Input />
+						<Input inputMode="email" value={email} onChangeText={setEmail} />
 					</S.Label>
 
 					<S.Label>
 						<S.LabelText>Senha</S.LabelText>
 
 						<Input
+							value={password}
+							onChangeText={setPassword}
 							secureTextEntry={hidePassword}
 							onPressButton={toggleShowPassword}
 							buttonIcon={
@@ -64,16 +86,7 @@ export default function Login() {
 					</S.Link>
 				</S.Form>
 
-				<Button
-					text="Entrar"
-					onPress={() =>
-						alert(
-							`Acessando perfil do ${
-								profileTypesTranslate[profileType as ProfileType]
-							}...`
-						)
-					}
-				/>
+				<Button text="Entrar" onPress={send} />
 			</ViewWithKeyboard>
 		</S.Container>
 	);
