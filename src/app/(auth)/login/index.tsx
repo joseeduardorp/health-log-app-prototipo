@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useLocalSearchParams, router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import Header from '@/components/auth/Header';
 import Title from '@/components/auth/Title';
@@ -12,7 +13,7 @@ import Input from '@/components/shared/Input';
 
 import * as S from './styles';
 
-import { ProfileType, LoginInputs } from './types';
+import { ProfileType, LoginData, LoginDataSchema } from './types';
 
 const profileTypesTranslate: Record<ProfileType, string> = {
 	patient: 'paciente',
@@ -27,11 +28,8 @@ const Login: React.FC = () => {
 		control,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<LoginInputs>({
-		defaultValues: {
-			email: '',
-			password: '',
-		},
+	} = useForm<LoginData>({
+		resolver: zodResolver(LoginDataSchema),
 	});
 
 	let title: string =
@@ -39,7 +37,7 @@ const Login: React.FC = () => {
 
 	const toggleShowPassword = () => setHidePassword((prev) => !prev);
 
-	const onSubmit: SubmitHandler<LoginInputs> = () => {
+	const onSubmit: SubmitHandler<LoginData> = () => {
 		router.navigate({
 			pathname: 'home',
 			params: {
@@ -64,6 +62,7 @@ const Login: React.FC = () => {
 						<Controller
 							control={control}
 							rules={{ required: true }}
+							defaultValue=""
 							render={({ field: { value, onChange } }) => (
 								<Input
 									inputMode="email"
@@ -74,7 +73,9 @@ const Login: React.FC = () => {
 							name="email"
 						/>
 
-						{errors.email && <S.ErrorMessage>Campo obrigatório</S.ErrorMessage>}
+						{errors.email && (
+							<S.ErrorMessage>{errors.email.message}</S.ErrorMessage>
+						)}
 					</S.Label>
 
 					<S.Label>
@@ -83,6 +84,7 @@ const Login: React.FC = () => {
 						<Controller
 							control={control}
 							rules={{ required: true }}
+							defaultValue=""
 							render={({ field: { value, onChange } }) => (
 								<Input
 									value={value}
@@ -102,7 +104,7 @@ const Login: React.FC = () => {
 						/>
 
 						{errors.password && (
-							<S.ErrorMessage>Campo obrigatório</S.ErrorMessage>
+							<S.ErrorMessage>{errors.password.message}</S.ErrorMessage>
 						)}
 					</S.Label>
 

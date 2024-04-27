@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useLocalSearchParams, router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import Header from '@/components/auth/Header';
 import Title from '@/components/auth/Title';
@@ -12,7 +13,7 @@ import Input from '@/components/shared/Input';
 
 import * as S from './styles';
 
-import { ProfileType, SignUpInputs } from './types';
+import { ProfileType, SignUpData, SignUpDataSchema } from './types';
 
 const profileTypesTranslate: Record<ProfileType, string> = {
 	patient: 'paciente',
@@ -27,12 +28,8 @@ const SignUp: React.FC = () => {
 		control,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<SignUpInputs>({
-		defaultValues: {
-			name: '',
-			email: '',
-			password: '',
-		},
+	} = useForm<SignUpData>({
+		resolver: zodResolver(SignUpDataSchema),
 	});
 
 	let title: string =
@@ -40,7 +37,7 @@ const SignUp: React.FC = () => {
 
 	const toggleShowPassword = () => setHidePassword((prev) => !prev);
 
-	const onSubmit: SubmitHandler<SignUpInputs> = (data) => {
+	const onSubmit: SubmitHandler<SignUpData> = (data) => {
 		router.navigate({
 			pathname: 'home',
 			params: {
@@ -66,13 +63,16 @@ const SignUp: React.FC = () => {
 						<Controller
 							control={control}
 							rules={{ required: true }}
+							defaultValue=""
 							render={({ field: { value, onChange } }) => (
 								<Input value={value} onChangeText={onChange} />
 							)}
 							name="name"
 						/>
 
-						{errors.name && <S.ErrorMessage>Campo obrigatório</S.ErrorMessage>}
+						{errors.name && (
+							<S.ErrorMessage>{errors.name.message}</S.ErrorMessage>
+						)}
 					</S.Label>
 
 					<S.Label>
@@ -81,6 +81,7 @@ const SignUp: React.FC = () => {
 						<Controller
 							control={control}
 							rules={{ required: true }}
+							defaultValue=""
 							render={({ field: { value, onChange } }) => (
 								<Input
 									inputMode="email"
@@ -91,7 +92,9 @@ const SignUp: React.FC = () => {
 							name="email"
 						/>
 
-						{errors.email && <S.ErrorMessage>Campo obrigatório</S.ErrorMessage>}
+						{errors.email && (
+							<S.ErrorMessage>{errors.email.message}</S.ErrorMessage>
+						)}
 					</S.Label>
 
 					<S.Label>
@@ -100,6 +103,7 @@ const SignUp: React.FC = () => {
 						<Controller
 							control={control}
 							rules={{ required: true }}
+							defaultValue=""
 							render={({ field: { value, onChange } }) => (
 								<Input
 									value={value}
@@ -119,7 +123,7 @@ const SignUp: React.FC = () => {
 						/>
 
 						{errors.password && (
-							<S.ErrorMessage>Campo obrigatório</S.ErrorMessage>
+							<S.ErrorMessage>{errors.password.message}</S.ErrorMessage>
 						)}
 					</S.Label>
 				</S.Form>

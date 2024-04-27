@@ -1,6 +1,10 @@
+import { z } from 'zod';
+
 export type ProfileType = 'patient' | 'caregiver';
 
-export type LoginInputs = {
-	email: string;
-	password: string;
-};
+export const LoginDataSchema = z.object({
+	email: z.string().email({ message: 'Endereço de e-mail inválido.' }),
+	password: z.string().min(8, { message: 'Minimo de 8 caracteres.' }),
+});
+
+export type LoginData = z.infer<typeof LoginDataSchema>;
