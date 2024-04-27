@@ -27,3 +27,8 @@ export const Link = styled(RouterLink)`
 	text-align: right;
 	text-decoration: underline;
 `;
+
+export const ErrorMessage = styled.Text`
+	color: #f00;
+	font-size: 10px;
+`;

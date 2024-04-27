@@ -1,7 +1,8 @@
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { useLocalSearchParams, router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
-import { useState } from 'react';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 
 import Header from '@/components/auth/Header';
 import Title from '@/components/auth/Title';
@@ -11,40 +12,40 @@ import Input from '@/components/shared/Input';
 
 import * as S from './styles';
 
-import { ProfileType } from './types';
+import { ProfileType, SignUpInputs } from './types';
 
 const profileTypesTranslate: Record<ProfileType, string> = {
 	patient: 'paciente',
 	caregiver: 'cuidador',
 };
 
-export default function SignUp() {
+const SignUp: React.FC = () => {
 	const { profileType } = useLocalSearchParams<{ profileType: ProfileType }>();
 	const [hidePassword, setHidePassword] = useState<boolean>(true);
 
-	const [name, setName] = useState<string>('');
-	const [email, setEmail] = useState<string>('');
-	const [password, setPassword] = useState<string>('');
+	const {
+		control,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<SignUpInputs>({
+		defaultValues: {
+			name: '',
+			email: '',
+			password: '',
+		},
+	});
 
 	let title: string =
 		'Criar perfil de ' + profileTypesTranslate[profileType as ProfileType];
 
 	const toggleShowPassword = () => setHidePassword((prev) => !prev);
 
-	const send = () => {
-		if (!name || !email || !password) {
-			alert('Preencha todos os campos!');
-			return;
-		}
-
-		setName('');
-		setEmail('');
-		setPassword('');
-
+	const onSubmit: SubmitHandler<SignUpInputs> = (data) => {
 		router.navigate({
 			pathname: 'home',
 			params: {
 				profileType,
+				username: data.name,
 			},
 		});
 	};
@@ -62,36 +63,71 @@ export default function SignUp() {
 					<S.Label>
 						<S.LabelText>Nome completo</S.LabelText>
 
-						<Input value={name} onChangeText={setName} />
+						<Controller
+							control={control}
+							rules={{ required: true }}
+							render={({ field: { value, onChange } }) => (
+								<Input value={value} onChangeText={onChange} />
+							)}
+							name="name"
+						/>
+
+						{errors.name && <S.ErrorMessage>Campo obrigatório</S.ErrorMessage>}
 					</S.Label>
 
 					<S.Label>
 						<S.LabelText>Email</S.LabelText>
 
-						<Input inputMode="email" value={email} onChangeText={setEmail} />
+						<Controller
+							control={control}
+							rules={{ required: true }}
+							render={({ field: { value, onChange } }) => (
+								<Input
+									inputMode="email"
+									value={value}
+									onChangeText={onChange}
+								/>
+							)}
+							name="email"
+						/>
+
+						{errors.email && <S.ErrorMessage>Campo obrigatório</S.ErrorMessage>}
 					</S.Label>
 
 					<S.Label>
 						<S.LabelText>Senha</S.LabelText>
 
-						<Input
-							value={password}
-							onChangeText={setPassword}
-							secureTextEntry={hidePassword}
-							onPressButton={toggleShowPassword}
-							buttonIcon={
-								<Feather
-									name={hidePassword ? 'eye-off' : 'eye'}
-									size={24}
-									color="#999"
+						<Controller
+							control={control}
+							rules={{ required: true }}
+							render={({ field: { value, onChange } }) => (
+								<Input
+									value={value}
+									onChangeText={onChange}
+									secureTextEntry={hidePassword}
+									onPressButton={toggleShowPassword}
+									buttonIcon={
+										<Feather
+											name={hidePassword ? 'eye-off' : 'eye'}
+											size={24}
+											color="#999"
+										/>
+									}
 								/>
-							}
+							)}
+							name="password"
 						/>
+
+						{errors.password && (
+							<S.ErrorMessage>Campo obrigatório</S.ErrorMessage>
+						)}
 					</S.Label>
 				</S.Form>
 
-				<Button text="Cadastrar" onPress={send} />
+				<Button text="Cadastrar" onPress={handleSubmit(onSubmit)} />
 			</ViewWithKeyboard>
 		</S.Container>
 	);
-}
+};
+
+export default SignUp;

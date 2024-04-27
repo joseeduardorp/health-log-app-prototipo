@@ -5,14 +5,14 @@ import Title from '@/components/auth/Title';
 
 import * as S from './styles';
 
-import { ProfileType } from './types';
-
 const Home: React.FC = () => {
-	const { profileType } = useLocalSearchParams<{ profileType: ProfileType }>();
+	const { username } = useLocalSearchParams<{ username?: string }>();
+
+	const welcomeMessage = username ? `Bem vindo, ${username}!` : 'Bem vindo!';
 
 	return (
 		<S.Container>
-			<Title text="Bem vindo!" />
+			<Title text={welcomeMessage} />
 		</S.Container>
 	);
 };
