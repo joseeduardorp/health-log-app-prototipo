@@ -4,6 +4,8 @@ import { useLocalSearchParams, router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ActivityIndicator } from 'react-native';
+import axios from 'axios';
 
 import Header from '@/components/auth/Header';
 import Title from '@/components/auth/Title';
@@ -11,9 +13,16 @@ import Button from '@/components/shared/Button';
 import ViewWithKeyboard from '@/components/shared/ViewWithKeyboard';
 import Input from '@/components/shared/Input';
 
+import { api } from '@/services/api';
+
 import * as S from './styles';
 
-import { ProfileType, SignUpData, SignUpDataSchema } from './types';
+import {
+	ProfileType,
+	SignUpData,
+	SignUpDataSchema,
+	ISignUpResponse,
+} from './types';
 
 const profileTypesTranslate: Record<ProfileType, string> = {
 	patient: 'paciente',
@@ -23,6 +32,7 @@ const profileTypesTranslate: Record<ProfileType, string> = {
 const SignUp: React.FC = () => {
 	const { profileType } = useLocalSearchParams<{ profileType: ProfileType }>();
 	const [hidePassword, setHidePassword] = useState<boolean>(true);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const {
 		control,
@@ -37,14 +47,34 @@ const SignUp: React.FC = () => {
 
 	const toggleShowPassword = () => setHidePassword((prev) => !prev);
 
-	const onSubmit: SubmitHandler<SignUpData> = (data) => {
-		router.navigate({
-			pathname: 'home',
-			params: {
-				profileType,
-				username: data.name,
-			},
-		});
+	const onSubmit: SubmitHandler<SignUpData> = async (data) => {
+		setIsLoading(true);
+
+		try {
+			const res = await api.post<ISignUpResponse>('/signup', {
+				...data,
+				accountType: profileType,
+			});
+			const user = res.data.user;
+
+			router.navigate({
+				pathname: 'home',
+				params: {
+					username: user.name,
+				},
+			});
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				console.log(error.response?.status);
+				console.log(error.response?.data);
+
+				alert(error.response?.data.message);
+			} else {
+				console.log(error);
+			}
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -64,8 +94,13 @@ const SignUp: React.FC = () => {
 							control={control}
 							rules={{ required: true }}
 							defaultValue=""
-							render={({ field: { value, onChange } }) => (
-								<Input value={value} onChangeText={onChange} />
+							disabled={isLoading}
+							render={({ field: { value, onChange, disabled } }) => (
+								<Input
+									value={value}
+									onChangeText={onChange}
+									editable={!disabled}
+								/>
 							)}
 							name="name"
 						/>
@@ -82,11 +117,13 @@ const SignUp: React.FC = () => {
 							control={control}
 							rules={{ required: true }}
 							defaultValue=""
-							render={({ field: { value, onChange } }) => (
+							disabled={isLoading}
+							render={({ field: { value, onChange, disabled } }) => (
 								<Input
 									inputMode="email"
 									value={value}
 									onChangeText={onChange}
+									editable={!disabled}
 								/>
 							)}
 							name="email"
@@ -104,10 +141,12 @@ const SignUp: React.FC = () => {
 							control={control}
 							rules={{ required: true }}
 							defaultValue=""
-							render={({ field: { value, onChange } }) => (
+							disabled={isLoading}
+							render={({ field: { value, onChange, disabled } }) => (
 								<Input
 									value={value}
 									onChangeText={onChange}
+									editable={!disabled}
 									secureTextEntry={hidePassword}
 									onPressButton={toggleShowPassword}
 									buttonIcon={
@@ -128,7 +167,11 @@ const SignUp: React.FC = () => {
 					</S.Label>
 				</S.Form>
 
-				<Button text="Cadastrar" onPress={handleSubmit(onSubmit)} />
+				{isLoading ? (
+					<ActivityIndicator />
+				) : (
+					<Button text="Cadastrar" onPress={handleSubmit(onSubmit)} />
+				)}
 			</ViewWithKeyboard>
 		</S.Container>
 	);

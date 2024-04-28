@@ -9,3 +9,14 @@ export const SignUpDataSchema = z.object({
 });
 
 export type SignUpData = z.infer<typeof SignUpDataSchema>;
+
+export interface ISignUpResponse {
+	status: string;
+	user: {
+		userId: number;
+		profileId: number;
+		name: string;
+		email: string;
+		accountType: ProfileType;
+	};
+}

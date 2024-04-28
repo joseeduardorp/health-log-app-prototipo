@@ -8,3 +8,12 @@ export const LoginDataSchema = z.object({
 });
 
 export type LoginData = z.infer<typeof LoginDataSchema>;
+
+export interface ILoginResponse {
+	status: string;
+	user: {
+		userId: number;
+		profileId: number;
+		accountType: ProfileType;
+	};
+}

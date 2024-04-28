@@ -4,6 +4,8 @@ import { useLocalSearchParams, router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ActivityIndicator } from 'react-native';
+import axios from 'axios';
 
 import Header from '@/components/auth/Header';
 import Title from '@/components/auth/Title';
@@ -13,7 +15,14 @@ import Input from '@/components/shared/Input';
 
 import * as S from './styles';
 
-import { ProfileType, LoginData, LoginDataSchema } from './types';
+import { api } from '@/services/api';
+
+import {
+	ProfileType,
+	LoginData,
+	LoginDataSchema,
+	ILoginResponse,
+} from './types';
 
 const profileTypesTranslate: Record<ProfileType, string> = {
 	patient: 'paciente',
@@ -23,6 +32,7 @@ const profileTypesTranslate: Record<ProfileType, string> = {
 const Login: React.FC = () => {
 	const { profileType } = useLocalSearchParams<{ profileType: ProfileType }>();
 	const [hidePassword, setHidePassword] = useState<boolean>(true);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const {
 		control,
@@ -37,13 +47,36 @@ const Login: React.FC = () => {
 
 	const toggleShowPassword = () => setHidePassword((prev) => !prev);
 
-	const onSubmit: SubmitHandler<LoginData> = () => {
-		router.navigate({
-			pathname: 'home',
-			params: {
-				profileType,
-			},
-		});
+	const onSubmit: SubmitHandler<LoginData> = async (data) => {
+		setIsLoading(true);
+
+		try {
+			const res = await api.post<ILoginResponse>('/login', {
+				...data,
+				accountType: profileType,
+			});
+			const user = res.data.user;
+
+			console.log(user);
+
+			router.navigate({
+				pathname: 'home',
+				params: {
+					profileType,
+				},
+			});
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				console.log(error.response?.status);
+				console.log(error.response?.data);
+
+				alert(error.response?.data.message);
+			} else {
+				console.log(error);
+			}
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -63,11 +96,13 @@ const Login: React.FC = () => {
 							control={control}
 							rules={{ required: true }}
 							defaultValue=""
-							render={({ field: { value, onChange } }) => (
+							disabled={isLoading}
+							render={({ field: { value, onChange, disabled } }) => (
 								<Input
 									inputMode="email"
 									value={value}
 									onChangeText={onChange}
+									editable={!disabled}
 								/>
 							)}
 							name="email"
@@ -85,10 +120,12 @@ const Login: React.FC = () => {
 							control={control}
 							rules={{ required: true }}
 							defaultValue=""
-							render={({ field: { value, onChange } }) => (
+							disabled={isLoading}
+							render={({ field: { value, onChange, disabled } }) => (
 								<Input
 									value={value}
 									onChangeText={onChange}
+									editable={!disabled}
 									secureTextEntry={hidePassword}
 									onPressButton={toggleShowPassword}
 									buttonIcon={
@@ -113,7 +150,11 @@ const Login: React.FC = () => {
 					</S.Link>
 				</S.Form>
 
-				<Button text="Entrar" onPress={handleSubmit(onSubmit)} />
+				{isLoading ? (
+					<ActivityIndicator />
+				) : (
+					<Button text="Entrar" onPress={handleSubmit(onSubmit)} />
+				)}
 			</ViewWithKeyboard>
 		</S.Container>
 	);
