@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { useLocalSearchParams, router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
@@ -11,11 +11,19 @@ import Button from '@/components/shared/Button';
 import ViewWithKeyboard from '@/components/shared/ViewWithKeyboard';
 import Input from '@/components/shared/Input';
 
+import { api } from '@/services/api';
+
 import * as S from './styles';
 
 import { ProfileType, LoginData, LoginDataSchema } from './types';
+import { useMutation } from '@tanstack/react-query';
+import { ActivityIndicator } from 'react-native';
 
-const profileTypesTranslate: Record<ProfileType, string> = {
+const postData = async (data: LoginData) => {
+	return await api.post('/login', data);
+};
+
+const profiles: Record<ProfileType, string> = {
 	patient: 'paciente',
 	caregiver: 'cuidador',
 };
@@ -31,20 +39,31 @@ const Login: React.FC = () => {
 	} = useForm<LoginData>({
 		resolver: zodResolver(LoginDataSchema),
 	});
-
-	let title: string =
-		'Acessar perfil de ' + profileTypesTranslate[profileType as ProfileType];
+	const { mutate, isSuccess, isPending, data } = useMutation({
+		mutationFn: postData,
+	});
 
 	const toggleShowPassword = () => setHidePassword((prev) => !prev);
 
-	const onSubmit: SubmitHandler<LoginData> = () => {
-		router.navigate({
-			pathname: 'home',
-			params: {
-				profileType,
-			},
-		});
+	const onSubmit: SubmitHandler<LoginData> = (data) => {
+		const userData: LoginData = {
+			...data,
+			accountType: profileType as ProfileType,
+		};
+
+		mutate(userData);
 	};
+
+	useEffect(() => {
+		if (data) {
+			router.navigate({
+				pathname: 'home',
+				params: {
+					profileType,
+				},
+			});
+		}
+	}, [isSuccess]);
 
 	return (
 		<S.Container>
@@ -53,7 +72,10 @@ const Login: React.FC = () => {
 			<ViewWithKeyboard>
 				<Header customStyles={{ top: 20, left: 0 }} />
 
-				<Title text={title} customStyles={{ marginTop: 150 }} />
+				<Title
+					text={`Acessar perfil de ${profiles[profileType as ProfileType]}`}
+					customStyles={{ marginTop: 150 }}
+				/>
 
 				<S.Form>
 					<S.Label>
@@ -68,6 +90,7 @@ const Login: React.FC = () => {
 									inputMode="email"
 									value={value}
 									onChangeText={onChange}
+									editable={!isPending}
 								/>
 							)}
 							name="email"
@@ -89,6 +112,7 @@ const Login: React.FC = () => {
 								<Input
 									value={value}
 									onChangeText={onChange}
+									editable={!isPending}
 									secureTextEntry={hidePassword}
 									onPressButton={toggleShowPassword}
 									buttonIcon={
@@ -113,7 +137,11 @@ const Login: React.FC = () => {
 					</S.Link>
 				</S.Form>
 
-				<Button text="Entrar" onPress={handleSubmit(onSubmit)} />
+				{isPending ? (
+					<ActivityIndicator />
+				) : (
+					<Button text="Entrar" onPress={handleSubmit(onSubmit)} />
+				)}
 			</ViewWithKeyboard>
 		</S.Container>
 	);

@@ -7,4 +7,6 @@ export const LoginDataSchema = z.object({
 	password: z.string().min(8, { message: 'Minimo de 8 caracteres.' }),
 });
 
-export type LoginData = z.infer<typeof LoginDataSchema>;
+export type LoginData = z.infer<typeof LoginDataSchema> & {
+	accountType: ProfileType;
+};

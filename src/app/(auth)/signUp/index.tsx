@@ -5,7 +5,6 @@ import Feather from '@expo/vector-icons/Feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ActivityIndicator } from 'react-native';
-import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
 
 import Header from '@/components/auth/Header';
@@ -31,7 +30,6 @@ const postData = async (data: SignUpData) => {
 
 const SignUp: React.FC = () => {
 	const { profileType } = useLocalSearchParams<{ profileType: ProfileType }>();
-	let title: string = 'Criar perfil de ' + profiles[profileType as ProfileType];
 
 	const [hidePassword, setHidePassword] = useState<boolean>(true);
 	const {
@@ -75,7 +73,10 @@ const SignUp: React.FC = () => {
 			<ViewWithKeyboard>
 				<Header customStyles={{ top: 20, left: 0 }} />
 
-				<Title text={title} customStyles={{ marginTop: 150 }} />
+				<Title
+					text={`Criar perfil de ${profiles[profileType as ProfileType]}`}
+					customStyles={{ marginTop: 150 }}
+				/>
 
 				<S.Form>
 					<S.Label>
