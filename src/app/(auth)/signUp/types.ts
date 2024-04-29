@@ -8,4 +8,17 @@ export const SignUpDataSchema = z.object({
 	password: z.string().min(8, { message: 'Minimo de 8 caracteres.' }),
 });
 
-export type SignUpData = z.infer<typeof SignUpDataSchema>;
+export type SignUpData = z.infer<typeof SignUpDataSchema> & {
+	accountType: ProfileType;
+};
+
+export interface IResponse {
+	status: string;
+	user: {
+		userId: number;
+		profileId: number;
+		name: string;
+		email: string;
+		accountType: ProfileType;
+	};
+}
