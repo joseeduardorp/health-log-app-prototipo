@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { useLocalSearchParams, router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ActivityIndicator } from 'react-native';
-import axios from 'axios';
+import { useMutation } from '@tanstack/react-query';
 
 import Header from '@/components/auth/Header';
 import Title from '@/components/auth/Title';
@@ -17,22 +17,20 @@ import { api } from '@/services/api';
 
 import * as S from './styles';
 
-import {
-	ProfileType,
-	SignUpData,
-	SignUpDataSchema,
-	ISignUpResponse,
-} from './types';
+import { ProfileType, SignUpData, SignUpDataSchema, IResponse } from './types';
 
-const profileTypesTranslate: Record<ProfileType, string> = {
+const profiles: Record<ProfileType, string> = {
 	patient: 'paciente',
 	caregiver: 'cuidador',
+};
+
+const postData = async (data: SignUpData) => {
+	return await api.post<IResponse>('/signup', data);
 };
 
 const SignUp: React.FC = () => {
 	const { profileType } = useLocalSearchParams<{ profileType: ProfileType }>();
 	const [hidePassword, setHidePassword] = useState<boolean>(true);
-	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const {
 		control,
@@ -41,41 +39,32 @@ const SignUp: React.FC = () => {
 	} = useForm<SignUpData>({
 		resolver: zodResolver(SignUpDataSchema),
 	});
-
-	let title: string =
-		'Criar perfil de ' + profileTypesTranslate[profileType as ProfileType];
+	const { mutate, isSuccess, isPending, data } = useMutation({
+		mutationFn: postData,
+	});
 
 	const toggleShowPassword = () => setHidePassword((prev) => !prev);
 
-	const onSubmit: SubmitHandler<SignUpData> = async (data) => {
-		setIsLoading(true);
+	const onSubmit: SubmitHandler<SignUpData> = (data) => {
+		const userData: SignUpData = {
+			...data,
+			accountType: profileType as ProfileType,
+		};
 
-		try {
-			const res = await api.post<ISignUpResponse>('/signup', {
-				...data,
-				accountType: profileType,
-			});
-			const user = res.data.user;
+		mutate(userData);
+	};
 
+	useEffect(() => {
+		if (data) {
 			router.navigate({
 				pathname: 'home',
 				params: {
-					username: user.name,
+					profileType,
+					username: data.data.user.name,
 				},
 			});
-		} catch (error) {
-			if (axios.isAxiosError(error)) {
-				console.log(error.response?.status);
-				console.log(error.response?.data);
-
-				alert(error.response?.data.message);
-			} else {
-				console.log(error);
-			}
-		} finally {
-			setIsLoading(false);
 		}
-	};
+	}, [isSuccess]);
 
 	return (
 		<S.Container>
@@ -84,7 +73,10 @@ const SignUp: React.FC = () => {
 			<ViewWithKeyboard>
 				<Header customStyles={{ top: 20, left: 0 }} />
 
-				<Title text={title} customStyles={{ marginTop: 150 }} />
+				<Title
+					text={`Criar perfil de ${profiles[profileType as ProfileType]}`}
+					customStyles={{ marginTop: 150 }}
+				/>
 
 				<S.Form>
 					<S.Label>
@@ -94,12 +86,11 @@ const SignUp: React.FC = () => {
 							control={control}
 							rules={{ required: true }}
 							defaultValue=""
-							disabled={isLoading}
-							render={({ field: { value, onChange, disabled } }) => (
+							render={({ field: { value, onChange } }) => (
 								<Input
 									value={value}
 									onChangeText={onChange}
-									editable={!disabled}
+									editable={!isPending}
 								/>
 							)}
 							name="name"
@@ -117,13 +108,12 @@ const SignUp: React.FC = () => {
 							control={control}
 							rules={{ required: true }}
 							defaultValue=""
-							disabled={isLoading}
-							render={({ field: { value, onChange, disabled } }) => (
+							render={({ field: { value, onChange } }) => (
 								<Input
 									inputMode="email"
 									value={value}
 									onChangeText={onChange}
-									editable={!disabled}
+									editable={!isPending}
 								/>
 							)}
 							name="email"
@@ -141,12 +131,11 @@ const SignUp: React.FC = () => {
 							control={control}
 							rules={{ required: true }}
 							defaultValue=""
-							disabled={isLoading}
-							render={({ field: { value, onChange, disabled } }) => (
+							render={({ field: { value, onChange } }) => (
 								<Input
 									value={value}
 									onChangeText={onChange}
-									editable={!disabled}
+									editable={!isPending}
 									secureTextEntry={hidePassword}
 									onPressButton={toggleShowPassword}
 									buttonIcon={
@@ -167,7 +156,7 @@ const SignUp: React.FC = () => {
 					</S.Label>
 				</S.Form>
 
-				{isLoading ? (
+				{isPending ? (
 					<ActivityIndicator />
 				) : (
 					<Button text="Cadastrar" onPress={handleSubmit(onSubmit)} />

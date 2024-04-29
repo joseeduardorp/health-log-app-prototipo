@@ -7,13 +7,6 @@ export const LoginDataSchema = z.object({
 	password: z.string().min(8, { message: 'Minimo de 8 caracteres.' }),
 });
 
-export type LoginData = z.infer<typeof LoginDataSchema>;
-
-export interface ILoginResponse {
-	status: string;
-	user: {
-		userId: number;
-		profileId: number;
-		accountType: ProfileType;
-	};
-}
+export type LoginData = z.infer<typeof LoginDataSchema> & {
+	accountType: ProfileType;
+};

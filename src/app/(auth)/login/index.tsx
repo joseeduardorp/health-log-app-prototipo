@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { useLocalSearchParams, router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ActivityIndicator } from 'react-native';
-import axios from 'axios';
+import { useMutation } from '@tanstack/react-query';
 
 import Header from '@/components/auth/Header';
 import Title from '@/components/auth/Title';
@@ -13,26 +13,24 @@ import Button from '@/components/shared/Button';
 import ViewWithKeyboard from '@/components/shared/ViewWithKeyboard';
 import Input from '@/components/shared/Input';
 
-import * as S from './styles';
-
 import { api } from '@/services/api';
 
-import {
-	ProfileType,
-	LoginData,
-	LoginDataSchema,
-	ILoginResponse,
-} from './types';
+import * as S from './styles';
 
-const profileTypesTranslate: Record<ProfileType, string> = {
+import { ProfileType, LoginData, LoginDataSchema } from './types';
+
+const profiles: Record<ProfileType, string> = {
 	patient: 'paciente',
 	caregiver: 'cuidador',
+};
+
+const postData = async (data: LoginData) => {
+	return await api.post('/login', data);
 };
 
 const Login: React.FC = () => {
 	const { profileType } = useLocalSearchParams<{ profileType: ProfileType }>();
 	const [hidePassword, setHidePassword] = useState<boolean>(true);
-	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const {
 		control,
@@ -41,43 +39,31 @@ const Login: React.FC = () => {
 	} = useForm<LoginData>({
 		resolver: zodResolver(LoginDataSchema),
 	});
-
-	let title: string =
-		'Acessar perfil de ' + profileTypesTranslate[profileType as ProfileType];
+	const { mutate, isSuccess, isPending, data } = useMutation({
+		mutationFn: postData,
+	});
 
 	const toggleShowPassword = () => setHidePassword((prev) => !prev);
 
-	const onSubmit: SubmitHandler<LoginData> = async (data) => {
-		setIsLoading(true);
+	const onSubmit: SubmitHandler<LoginData> = (data) => {
+		const userData: LoginData = {
+			...data,
+			accountType: profileType as ProfileType,
+		};
 
-		try {
-			const res = await api.post<ILoginResponse>('/login', {
-				...data,
-				accountType: profileType,
-			});
-			const user = res.data.user;
+		mutate(userData);
+	};
 
-			console.log(user);
-
+	useEffect(() => {
+		if (data) {
 			router.navigate({
 				pathname: 'home',
 				params: {
 					profileType,
 				},
 			});
-		} catch (error) {
-			if (axios.isAxiosError(error)) {
-				console.log(error.response?.status);
-				console.log(error.response?.data);
-
-				alert(error.response?.data.message);
-			} else {
-				console.log(error);
-			}
-		} finally {
-			setIsLoading(false);
 		}
-	};
+	}, [isSuccess]);
 
 	return (
 		<S.Container>
@@ -86,7 +72,10 @@ const Login: React.FC = () => {
 			<ViewWithKeyboard>
 				<Header customStyles={{ top: 20, left: 0 }} />
 
-				<Title text={title} customStyles={{ marginTop: 150 }} />
+				<Title
+					text={`Acessar perfil de ${profiles[profileType as ProfileType]}`}
+					customStyles={{ marginTop: 150 }}
+				/>
 
 				<S.Form>
 					<S.Label>
@@ -96,13 +85,12 @@ const Login: React.FC = () => {
 							control={control}
 							rules={{ required: true }}
 							defaultValue=""
-							disabled={isLoading}
-							render={({ field: { value, onChange, disabled } }) => (
+							render={({ field: { value, onChange } }) => (
 								<Input
 									inputMode="email"
 									value={value}
 									onChangeText={onChange}
-									editable={!disabled}
+									editable={!isPending}
 								/>
 							)}
 							name="email"
@@ -120,12 +108,11 @@ const Login: React.FC = () => {
 							control={control}
 							rules={{ required: true }}
 							defaultValue=""
-							disabled={isLoading}
-							render={({ field: { value, onChange, disabled } }) => (
+							render={({ field: { value, onChange } }) => (
 								<Input
 									value={value}
 									onChangeText={onChange}
-									editable={!disabled}
+									editable={!isPending}
 									secureTextEntry={hidePassword}
 									onPressButton={toggleShowPassword}
 									buttonIcon={
@@ -150,7 +137,7 @@ const Login: React.FC = () => {
 					</S.Link>
 				</S.Form>
 
-				{isLoading ? (
+				{isPending ? (
 					<ActivityIndicator />
 				) : (
 					<Button text="Entrar" onPress={handleSubmit(onSubmit)} />
