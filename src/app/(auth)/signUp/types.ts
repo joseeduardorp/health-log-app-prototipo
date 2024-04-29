@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import useSignUpModel from './model';
 
 export type ProfileType = 'patient' | 'caregiver';
 
@@ -22,3 +23,5 @@ export interface IResponse {
 		accountType: ProfileType;
 	};
 }
+
+export type SignUpViewProps = ReturnType<typeof useSignUpModel>;

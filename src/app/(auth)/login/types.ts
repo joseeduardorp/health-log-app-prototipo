@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import useLoginModel from './model';
 
 export type ProfileType = 'patient' | 'caregiver';
 
@@ -10,3 +11,5 @@ export const LoginDataSchema = z.object({
 export type LoginData = z.infer<typeof LoginDataSchema> & {
 	accountType: ProfileType;
 };
+
+export type LoginViewProps = ReturnType<typeof useLoginModel>;
